@@ -10,6 +10,14 @@ class ComportamientoJugador : public Comportamiento{
     ComportamientoJugador(unsigned int size) : Comportamiento(size){
       // Constructor de la clase
       // Dar el valor inicial a las variables de estado
+      fil = col = 99;
+      brujula = 0;
+      girarDerecha = false;
+      bienSituado  = false;
+      tengoBikini = tengoZapatillas = false;
+      ultimaAccion = actIDLE;
+      pendienteGiroIzda = pendienteGiroDcha = false;
+      sinDescubrirNorte = sinDescubrirEste = sinDescubrirSur = sinDescubrirOeste = false;
     }
 
     ComportamientoJugador(const ComportamientoJugador & comport) : Comportamiento(comport){}
@@ -19,8 +27,13 @@ class ComportamientoJugador : public Comportamiento{
     int interact(Action accion, int valor);
 
   private:
-  
   // Declarar aquí las variables de estado
+  int fil, col, brujula;
+  bool girarDerecha, bienSituado;
+  bool tengoBikini, tengoZapatillas;
+  bool pendienteGiroIzda, pendienteGiroDcha;
+  bool sinDescubrirNorte, sinDescubrirEste, sinDescubrirSur, sinDescubrirOeste;
+  Action ultimaAccion;  
 
 };
 
