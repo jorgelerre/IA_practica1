@@ -34,15 +34,21 @@ Action ComportamientoJugador::think(Sensores sensores){
 	
 	//Si se produce un reset, damos a todas las variables de estado su valor inicial
 	if(sensores.reset){
-		fil = col = 99;
+		fil = col = -1;
       	brujula = 0;
       	girarDerecha = false;
-      	bienSituado  = false;
+      	if(sensores.nivel != 0){
+      		bienSituado  = false;
+      	}
       	tengoBikini = tengoZapatillas = false;
       	ultimaAccion = actIDLE;
       	pendienteGiroIzda = pendienteGiroDcha = false;
-      	sinDescubrirNorte = sinDescubrirEste = sinDescubrirSur = sinDescubrirOeste = true;
+      	sinDescubrirNorte = sinDescubrirEste = sinDescubrirSur = sinDescubrirOeste = false;
 	}
+	
+	//Actualizamos el valor aleatorio
+	girarDerecha = (rand() % 2 == 0);
+	
 	
 	switch (ultimaAccion){
 		case actFORWARD:
@@ -55,11 +61,9 @@ Action ComportamientoJugador::think(Sensores sensores){
 			break;
 		case actTURN_L:
 			brujula = (brujula+3)%4;
-			girarDerecha = (rand() % 2 == 0);
 			break;
 		case actTURN_R:
 			brujula = (brujula+1)%4;
-			girarDerecha = (rand() % 2 == 0);
 			break;	
 	}
 	
@@ -120,28 +124,30 @@ Action ComportamientoJugador::think(Sensores sensores){
 	
 	//Comprobación de sectores cercanos sin explorar
 	if(bienSituado){
-		if(sensores.posF>=5 && (mapaResultado[sensores.posF-5][sensores.posC] == '?'))// || mapaResultado[sensores.posF][sensores.posC-8] == '?'))
+		if(fil>=5 && (mapaResultado[fil-5][col] == '?'))// || mapaResultado[sensores.posF][sensores.posC-8] == '?'))
 			sinDescubrirNorte = true;
 		else
 			sinDescubrirNorte = false;
 			
-		if(sensores.posC<25 && (mapaResultado[sensores.posF][sensores.posC+5] == '?'))// || mapaResultado[sensores.posF][sensores.posC+8] == '?'))
+		if(col<tam_mapa-5 && (mapaResultado[fil][col+5] == '?'))// || mapaResultado[sensores.posF][sensores.posC+8] == '?'))
 			sinDescubrirEste = true;
 		else
 			sinDescubrirEste = false;
 		
-		if(sensores.posF<25 && (mapaResultado[sensores.posF+5][sensores.posC] == '?'))// || mapaResultado[sensores.posF+8][sensores.posC] == '?'))
+		if(fil<tam_mapa-5 && (mapaResultado[fil+5][col] == '?'))// || mapaResultado[sensores.posF+8][sensores.posC] == '?'))
 			sinDescubrirSur = true;
 		else
 			sinDescubrirSur = false;
 		
-		if(sensores.posC>=5 && (mapaResultado[sensores.posF][sensores.posC-5] == '?' ))//|| mapaResultado[sensores.posF][sensores.posC-8] == '?'))
+		if(col>=5 && (mapaResultado[fil][col-5] == '?' ))//|| mapaResultado[sensores.posF][sensores.posC-8] == '?'))
 			sinDescubrirOeste = true;
 		else
 			sinDescubrirOeste = false;
 	}
-	//Definir la nueva acción
 	
+	
+	
+	//Definir la nueva acción
 	//Si comienza en agua o bosque, avanza hasta salir de ahí
 	if(((sensores.terreno[0]=='A' && !tengoBikini) || (sensores.terreno[0]=='B' && !tengoZapatillas)) && sensores.terreno[2] != 'P'){
 		accion = actFORWARD;
@@ -157,55 +163,49 @@ Action ComportamientoJugador::think(Sensores sensores){
 	}
 	
 	//Si solo al norte hay una zona sin descubrir, ve hacia el norte el 50% de las veces
-	//else if (bienSituado && !sinDescubrirOeste && sinDescubrirNorte && !sinDescubrirEste && !sinDescubrirSur && girarDerecha){
-	else if (bienSituado && sinDescubrirNorte && girarDerecha){
-		if(sensores.sentido == 3)		//Si ahora va hacia el oeste
+	else if (bienSituado && !sinDescubrirOeste && sinDescubrirNorte && !sinDescubrirEste && !sinDescubrirSur && girarDerecha){
+		if(brujula == 3)		//Si ahora va hacia el oeste
 			accion = actTURN_R;			//Gira a la derecha
-		else if(sensores.sentido == 1)	//Si va al este
+		else if(brujula == 1)	//Si va al este
 			accion = actTURN_L;			//Gira a la izquierda
-		else if(sensores.sentido == 2){	//Si va en direccion contraria
+		else if(brujula == 2){	//Si va en direccion contraria
 			accion = actTURN_L;			//Da media vuelta
 			pendienteGiroIzda = true;
 		}	
 	}
 	//Si solo al este hay una zona sin descubrir, ve hacia el este el 50% de las veces
-	//else if (bienSituado && sinDescubrirEste && !sinDescubrirNorte && !sinDescubrirSur && !sinDescubrirOeste && girarDerecha){
-	else if (bienSituado && sinDescubrirEste && girarDerecha){
-		if(sensores.sentido == 0)		//Si ahora va hacia el norte
+	else if (bienSituado && sinDescubrirEste && !sinDescubrirNorte && !sinDescubrirSur && !sinDescubrirOeste && girarDerecha){
+		if(brujula == 0)		//Si ahora va hacia el norte
 			accion = actTURN_R;			//Gira a la derecha
-		else if(sensores.sentido == 2)	//Si va al sur
+		else if(brujula == 2)	//Si va al sur
 			accion = actTURN_L;			//Gira a la izquierda
-		else if(sensores.sentido == 3){	//Si va al oeste
+		else if(brujula == 3){	//Si va al oeste
 			accion = actTURN_L;			//Da media vuelta
 			pendienteGiroIzda = true;
 		}
 	}
 	//Si solo al sur hay una zona sin descubrir, ve hacia el sur el 50% de las veces
-	//else if (bienSituado && !sinDescubrirOeste && !sinDescubrirNorte && !sinDescubrirEste && sinDescubrirSur && girarDerecha){
-	else if (bienSituado && sinDescubrirSur && girarDerecha){
-		if(sensores.sentido == 1)		//Si ahora va hacia el este
+	else if (bienSituado && !sinDescubrirOeste && !sinDescubrirNorte && !sinDescubrirEste && sinDescubrirSur && girarDerecha){
+		if(brujula == 1)		//Si ahora va hacia el este
 			accion = actTURN_R;			//Gira a la derecha
-		else if(sensores.sentido == 3)	//Si va al oeste
+		else if(brujula == 3)	//Si va al oeste
 			accion = actTURN_L;			//Gira a la izquierda
-		else if(sensores.sentido == 0){	//Si va en direccion contraria
+		else if(brujula == 0){	//Si va en direccion contraria
 			accion = actTURN_L;			//Da media vuelta
 			pendienteGiroIzda = true;
 		}
 	}
 	//Si solo al oeste hay una zona sin descubrir, ve hacia al oeste el 50% de las veces
-	//else if (bienSituado && sinDescubrirOeste && !sinDescubrirNorte && !sinDescubrirEste && !sinDescubrirSur && girarDerecha){
-	else if (bienSituado && sinDescubrirOeste && girarDerecha){
-		if(sensores.sentido == 2)		//Si ahora va hacia el sur
+	else if (bienSituado && sinDescubrirOeste && !sinDescubrirNorte && !sinDescubrirEste && !sinDescubrirSur && girarDerecha){
+		if(brujula == 2)		//Si ahora va hacia el sur
 			accion = actTURN_R;			//Gira a la derecha
-		else if(sensores.sentido == 0)	//Si va al norte
+		else if(brujula == 0)	//Si va al norte
 			accion = actTURN_L;			//Gira a la izquierda
-		else if(sensores.sentido == 1){	//Si va en direccion contraria
+		else if(brujula == 1){	//Si va en direccion contraria
 			accion = actTURN_L;			//Da media vuelta
 			pendienteGiroIzda = true;
 		}
 	}
-	
-	
 	
 	if (accion == actIDLE){
 		if((sensores.terreno[2]=='T' || sensores.terreno[2]=='S' || sensores.terreno[2]=='G'
@@ -229,7 +229,13 @@ Action ComportamientoJugador::think(Sensores sensores){
 			{
 				pendienteGiroDcha = true;
 			}
-		} else if(!girarDerecha){
+		}
+		//Mejora para que el personaje no se bloquee en pasajes estrechos girando todo el rato
+		else if((ultimaAccion == actTURN_L || ultimaAccion == actTURN_R) && (sensores.terreno[2] == 'M' || sensores.terreno[2] == 'P')){
+			accion = ultimaAccion;
+		} 
+		
+		else if(!girarDerecha){
 			accion = actTURN_L;
 		} else {
 			accion = actTURN_R;
@@ -237,6 +243,11 @@ Action ComportamientoJugador::think(Sensores sensores){
 	}
 	
 	//Recordar última acción
+	if(ultimaAccion == accion)
+		repeticionesUltimaAccion++;
+	else
+		repeticionesUltimaAccion = 1;
+		
 	ultimaAccion = accion;
 	return accion;
 }
