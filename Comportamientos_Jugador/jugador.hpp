@@ -14,12 +14,16 @@ class ComportamientoJugador : public Comportamiento{
       fil = col = 99;
       brujula = 0;
       repeticionesUltimaAccion = 0;
-      girarDerecha = false;
-      bienSituado  = false;
+      bienSituado = false;
+      girarDerecha = girarDerecha2 = false;
       tengoBikini = tengoZapatillas = false;
       ultimaAccion = actIDLE;
       pendienteGiroIzda = pendienteGiroDcha = false;
       sinDescubrirNorte = sinDescubrirEste = sinDescubrirSur = sinDescubrirOeste = false;
+      muroDcha = muroIzda = false;
+      bloqueadoNorte = bloqueadoEste = bloqueadoSur = bloqueadoOeste = 0;
+      
+      
     }
 
     ComportamientoJugador(const ComportamientoJugador & comport) : Comportamiento(comport){}
@@ -32,12 +36,19 @@ class ComportamientoJugador : public Comportamiento{
   // Declarar aquí las variables de estado
   int fil, col, brujula, tam_mapa;
   int repeticionesUltimaAccion;
-  bool girarDerecha, bienSituado;
+  bool girarDerecha, girarDerecha2, bienSituado;
   bool tengoBikini, tengoZapatillas;
   bool pendienteGiroIzda, pendienteGiroDcha;
   bool sinDescubrirNorte, sinDescubrirEste, sinDescubrirSur, sinDescubrirOeste;
+  bool muroDcha, muroIzda;
+  int bloqueadoNorte, bloqueadoEste, bloqueadoSur, bloqueadoOeste;
+  bool noHaySalida;
   Action ultimaAccion;  
 
+
+  //Funciones auxiliares
+  bool esTransitable(char tipoCasilla);
+  Action girarADireccion(int sentidoActual, int nuevoSentido);
 };
 
 #endif
