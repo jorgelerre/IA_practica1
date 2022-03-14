@@ -20,6 +20,8 @@ class ComportamientoJugador : public Comportamiento{
       ultimaAccion = actIDLE;
       pendienteGiroIzda = pendienteGiroDcha = false;
       sinDescubrirNorte[0]  = sinDescubrirEste[0]  = sinDescubrirSur[0]  = sinDescubrirOeste[0]  = false;
+      sinDescubrirNorte[1]  = sinDescubrirEste[1]  = sinDescubrirSur[1]  = sinDescubrirOeste[1]  = false;
+      sinDescubrirNorte[2]  = sinDescubrirEste[2]  = sinDescubrirSur[2]  = sinDescubrirOeste[2]  = false;
       muroDcha = muroIzda = false;
       bloqueadoNorte = bloqueadoEste = bloqueadoSur = bloqueadoOeste = 0;
       noHaySalida = false;
