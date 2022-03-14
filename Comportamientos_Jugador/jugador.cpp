@@ -80,7 +80,7 @@ Action ComportamientoJugador::think(Sensores sensores){
       	tengoBikini = tengoZapatillas = false;
       	ultimaAccion = actIDLE;
       	pendienteGiroIzda = pendienteGiroDcha = false;
-      	sinDescubrirNorte = sinDescubrirEste = sinDescubrirSur = sinDescubrirOeste = false;
+      	sinDescubrirNorte[0] = sinDescubrirEste[0]  = sinDescubrirSur[0]  = sinDescubrirOeste[0]  = false;
 	}
 	
 	//Actualizamos los valores aleatorios
@@ -174,28 +174,29 @@ Action ComportamientoJugador::think(Sensores sensores){
 			mapaResultado[fil+3*coef][col-3*coef] = sensores.terreno[15];
 		}
 	}
-	
+	//Actualizacion de si se necesita recargar bateria
+	recargarBateria = ((sensores.bateria < 1500 && sensores.vida > 700) || sensores.bateria < 500);
 	//Comprobación de sectores cercanos sin explorar
 	if(bienSituado){
 		if(fil>=4 && mapaResultado[fil-4][col] == '?')
-			sinDescubrirNorte = true;
+			sinDescubrirNorte[0]  = true;
 		else
-			sinDescubrirNorte = false;
+			sinDescubrirNorte[0]  = false;
 			
 		if(col<tam_mapa-4 && mapaResultado[fil][col+4] == '?' )
-			sinDescubrirEste = true;
+			sinDescubrirEste[0]  = true;
 		else
-			sinDescubrirEste = false;
+			sinDescubrirEste[0]  = false;
 		
 		if(fil<tam_mapa-4 && mapaResultado[fil+4][col] == '?')
-			sinDescubrirSur = true;
+			sinDescubrirSur[0]  = true;
 		else
-			sinDescubrirSur = false;
+			sinDescubrirSur[0]  = false;
 		
 		if(col>=4 && mapaResultado[fil][col-4] == '?' )
-			sinDescubrirOeste = true;
+			sinDescubrirOeste[0]  = true;
 		else
-			sinDescubrirOeste = false;
+			sinDescubrirOeste[0]  = false;
 	}
 	
 	//Comprobación de muros/obstaculos en frente del jugador
@@ -217,10 +218,10 @@ Action ComportamientoJugador::think(Sensores sensores){
 	  }
 	  
 	  noHaySalida = (bloqueadoNorte > 0) && (bloqueadoEste > 0) && (bloqueadoSur > 0) && (bloqueadoOeste > 0);
-	cout << "Sin descubrir Norte: " << sinDescubrirNorte << endl;
-	cout << "Sin descubrir Este: "  << sinDescubrirEste  << endl;
-	cout << "Sin descubrir Sur: "   << sinDescubrirSur   << endl;
-	cout << "Sin descubrir Oeste: " << sinDescubrirOeste << endl;
+	cout << "Sin descubrir Norte: " << sinDescubrirNorte[0]  << endl;
+	cout << "Sin descubrir Este: "  << sinDescubrirEste[0]   << endl;
+	cout << "Sin descubrir Sur: "   << sinDescubrirSur[0]    << endl;
+	cout << "Sin descubrir Oeste: " << sinDescubrirOeste[0]  << endl;
 	cout << "Bloqueado Norte: " << bloqueadoNorte << endl;
 	cout << "Bloqueado Este: "  << bloqueadoEste  << endl;
 	cout << "Bloqueado Sur: "   << bloqueadoSur   << endl;
@@ -247,167 +248,178 @@ Action ComportamientoJugador::think(Sensores sensores){
 		pendienteGiroIzda = false;	
 		cout << "Giro Pendiente Izquierda" << endl;
 	}
-	
-	//Si el personaje está frente a un callejón sin salida, hacemos que gire
-	else if (!esTransitable(sensores.terreno[1])
-		&& !esTransitable(sensores.terreno[3])
-		&& !esTransitable(sensores.terreno[6])
-		){
-		cout << "Detectado callejon 136" << endl;
-		if(ultimaAccion == actTURN_R && !muroIzda){
-			accion = actTURN_L;
-		}
-		else if (ultimaAccion == actTURN_L && !muroDcha){
-			accion = actTURN_R;
-		}
-		else if(!muroDcha && muroIzda){
-			cout << "Giro a la derecha (muros)" << endl;
-			accion = actTURN_R;
-		}
-		else if(muroDcha && !muroIzda){
-		cout << "Giro a la izquierda (muros)" << endl;
-			accion = actTURN_L;
-		}
-		else if (girarDerecha){
-			accion = actTURN_R;
-		}
-		else{
-			accion = actTURN_L;
-		}
+	//Si se necesita recargar bateria, quedate en el punto de recarga
+	else if(sensores.terreno[0] == 'X' && recargarBateria){
+		accion = actIDLE;
+		cout << "Recargando..." << endl;
 	}
-	
-	//Si solo al norte hay una zona sin descubrir, ve hacia el norte el 50% de las veces
-	else if (bienSituado && !sinDescubrirOeste && sinDescubrirNorte && !sinDescubrirEste && !sinDescubrirSur && girarDerecha && bloqueadoNorte <= 0){
-		accion = girarADireccion(sensores.sentido, 0);
-		cout << "Yendo al Norte para descubrir mapa" << endl;
-	}
-	//Si solo al este hay una zona sin descubrir, ve hacia el este el 50% de las veces
-	else if (bienSituado && sinDescubrirEste && !sinDescubrirNorte && !sinDescubrirSur && !sinDescubrirOeste && girarDerecha && bloqueadoEste <= 0){
-		accion = girarADireccion(sensores.sentido, 1);
-		cout << "Yendo al Este para descubrir mapa" << endl;
-	}
-	//Si solo al sur hay una zona sin descubrir, ve hacia el sur el 50% de las veces
-	else if (bienSituado && !sinDescubrirOeste && !sinDescubrirNorte && !sinDescubrirEste && sinDescubrirSur && girarDerecha && bloqueadoSur <= 0){
-		accion = girarADireccion(sensores.sentido, 2);
-		cout << "Yendo al Sur para descubrir mapa" << endl;
-	}
-	//Si solo al oeste hay una zona sin descubrir, ve hacia al oeste el 50% de las veces
-	else if (bienSituado && sinDescubrirOeste && !sinDescubrirNorte && !sinDescubrirEste && !sinDescubrirSur && girarDerecha && bloqueadoOeste <= 0){
-		accion = girarADireccion(sensores.sentido, 3);
-		cout << "Yendo al Oeste para descubrir mapa" << endl;
-	}
-	//Si hay al norte y al sur zona sin descubrir, ve hacia alguna de ellas al azar
-	else if (bienSituado && !sinDescubrirOeste && sinDescubrirNorte && !sinDescubrirEste && sinDescubrirSur && girarDerecha && bloqueadoNorte <= 0 && bloqueadoSur <= 0){
-		if(girarDerecha2){
+	else{
+		//Si el personaje está frente a un callejón sin salida, hacemos que gire
+		if (!esTransitable(sensores.terreno[1])
+			&& !esTransitable(sensores.terreno[3])
+			&& !esTransitable(sensores.terreno[6])
+			){
+			cout << "Detectado callejon 136" << endl;
+			if(ultimaAccion == actTURN_R && !muroIzda){
+				accion = actTURN_L;
+				cout << "Giro con continuidad" << endl;
+			}
+			else if (ultimaAccion == actTURN_L && !muroDcha){
+				accion = actTURN_R;
+				cout << "Giro con continuidad" << endl;
+			}
+			else if(!muroDcha && muroIzda){
+				cout << "Giro a la derecha (muros)" << endl;
+				accion = actTURN_R;
+			}
+			else if(muroDcha && !muroIzda){
+			cout << "Giro a la izquierda (muros)" << endl;
+				accion = actTURN_L;
+			}
+			else if (girarDerecha){
+				accion = actTURN_R;
+			}
+			else{
+				accion = actTURN_L;
+			}
+		}
+		
+		//Si solo al norte hay una zona sin descubrir, ve hacia el norte el 50% de las veces
+		else if (bienSituado && !sinDescubrirOeste[0]  && sinDescubrirNorte[0]  && !sinDescubrirEste[0]  && !sinDescubrirSur[0]  && girarDerecha && bloqueadoNorte <= 0){
 			accion = girarADireccion(sensores.sentido, 0);
-			cout << "Yendo al Norte para descubrir mapa (v. dos posibilidades)." << endl;
+			cout << "Yendo al Norte para descubrir mapa" << endl;
 		}
-		else{
-			accion = girarADireccion(sensores.sentido, 2);
-			cout << "Yendo al Sur para descubrir mapa (v. dos posibilidades)." << endl;
-		}
-	}
-	//Si hay al este y al oeste zona sin descubrir, ve hacia alguna de ellas al azar
-	else if (bienSituado && sinDescubrirOeste && !sinDescubrirNorte && sinDescubrirEste && !sinDescubrirSur && girarDerecha && bloqueadoEste <= 0 && bloqueadoOeste <= 0){
-		if(girarDerecha2){
+		//Si solo al este hay una zona sin descubrir, ve hacia el este el 50% de las veces
+		else if (bienSituado && sinDescubrirEste[0]  && !sinDescubrirNorte[0]  && !sinDescubrirSur[0]  && !sinDescubrirOeste[0]  && girarDerecha && bloqueadoEste <= 0){
 			accion = girarADireccion(sensores.sentido, 1);
-			cout << "Yendo al Este para descubrir mapa (v. dos posibilidades)." << endl;
+			cout << "Yendo al Este para descubrir mapa" << endl;
 		}
-		else{
+		//Si solo al sur hay una zona sin descubrir, ve hacia el sur el 50% de las veces
+		else if (bienSituado && !sinDescubrirOeste[0]  && !sinDescubrirNorte[0]  && !sinDescubrirEste[0]  && sinDescubrirSur[0]  && girarDerecha && bloqueadoSur <= 0){
+			accion = girarADireccion(sensores.sentido, 2);
+			cout << "Yendo al Sur para descubrir mapa" << endl;
+		}
+		//Si solo al oeste hay una zona sin descubrir, ve hacia al oeste el 50% de las veces
+		else if (bienSituado && sinDescubrirOeste[0]  && !sinDescubrirNorte[0]  && !sinDescubrirEste[0]  && !sinDescubrirSur[0]  && girarDerecha && bloqueadoOeste <= 0){
 			accion = girarADireccion(sensores.sentido, 3);
-			cout << "Yendo al Oeste para descubrir mapa (v. dos posibilidades)." << endl;
+			cout << "Yendo al Oeste para descubrir mapa" << endl;
 		}
-	}
-	
-	if (accion == actIDLE){
-		if(esTransitable(sensores.terreno[2]) && (sensores.superficie[2]=='_')){
-			accion = actFORWARD;
-			cout << "Hacia delante" << endl;
-			//Si se tiene un objeto a la izquierda, se girará al siguiente movimiento a la izquierda
-			if (
-			((sensores.terreno[1] == 'K' || sensores.terreno[4] == 'K' || sensores.terreno[9] == 'K') && !tengoBikini)     || 
-			((sensores.terreno[1] == 'D' || sensores.terreno[4] == 'D' || sensores.terreno[9] == 'D') && !tengoZapatillas) ||
-			((sensores.terreno[1] == 'G' || sensores.terreno[4] == 'G' || sensores.terreno[9] == 'G') && !bienSituado)){
-				pendienteGiroIzda = true;
-				cout << "Objeto visto a la izquierda" << endl;
+		//Si hay al norte y al sur zona sin descubrir, ve hacia alguna de ellas al azar
+		else if (bienSituado && !sinDescubrirOeste[0]  && sinDescubrirNorte[0]  && !sinDescubrirEste[0]  && sinDescubrirSur[0]  && girarDerecha && bloqueadoNorte <= 0 && bloqueadoSur <= 0){
+			if(girarDerecha2){
+				accion = girarADireccion(sensores.sentido, 0);
+				cout << "Yendo al Norte para descubrir mapa (v. dos posibilidades)." << endl;
 			}
-			//Si se tiene un objeto a la derecha, se girará al siguiente movimiento a la derecha
-			else if (
-			((sensores.terreno[3] == 'K' || sensores.terreno[8] == 'K' || sensores.terreno[15] == 'K') && !tengoBikini)     || 
-			((sensores.terreno[3] == 'D' || sensores.terreno[8] == 'D' || sensores.terreno[15] == 'D') && !tengoZapatillas) ||
-			((sensores.terreno[3] == 'G' || sensores.terreno[8] == 'G' || sensores.terreno[15] == 'G') && !bienSituado))
-			{
-				pendienteGiroDcha = true;
-				cout << "Objeto visto a la derecha" << endl;
+			else{
+				accion = girarADireccion(sensores.sentido, 2);
+				cout << "Yendo al Sur para descubrir mapa (v. dos posibilidades)." << endl;
 			}
+		}
+		//Si hay al este y al oeste zona sin descubrir, ve hacia alguna de ellas al azar
+		else if (bienSituado && sinDescubrirOeste[0]  && !sinDescubrirNorte[0]  && sinDescubrirEste[0]  && !sinDescubrirSur[0]  && girarDerecha && bloqueadoEste <= 0 && bloqueadoOeste <= 0){
+			if(girarDerecha2){
+				accion = girarADireccion(sensores.sentido, 1);
+				cout << "Yendo al Este para descubrir mapa (v. dos posibilidades)." << endl;
+			}
+			else{
+				accion = girarADireccion(sensores.sentido, 3);
+				cout << "Yendo al Oeste para descubrir mapa (v. dos posibilidades)." << endl;
+			}
+		}
+		
+		if (accion == actIDLE){
+			if(esTransitable(sensores.terreno[2]) && (sensores.superficie[2]=='_')){
+				accion = actFORWARD;
+				cout << "Hacia delante" << endl;
+				//Si se tiene un objeto a la izquierda, se girará al siguiente movimiento a la izquierda
+				if(
+				((sensores.terreno[1] == 'K' || sensores.terreno[4] == 'K' || sensores.terreno[9] == 'K') && !tengoBikini)     || 
+				((sensores.terreno[1] == 'D' || sensores.terreno[4] == 'D' || sensores.terreno[9] == 'D') && !tengoZapatillas) ||
+				((sensores.terreno[1] == 'G' || sensores.terreno[4] == 'G' || sensores.terreno[9] == 'G') && !bienSituado)
+				((sensores.terreno[1] == 'X' || sensores.terreno[4] == 'X' || sensores.terreno[9] == 'X') && recargarBateria)
+				){
+					pendienteGiroIzda = true;
+					cout << "Objeto visto a la izquierda" << endl;
+				}
+				//Si se tiene un objeto a la derecha, se girará al siguiente movimiento a la derecha
+				else if (
+				((sensores.terreno[3] == 'K' || sensores.terreno[8] == 'K' || sensores.terreno[15] == 'K') && !tengoBikini)     || 
+				((sensores.terreno[3] == 'D' || sensores.terreno[8] == 'D' || sensores.terreno[15] == 'D') && !tengoZapatillas) ||
+				((sensores.terreno[3] == 'G' || sensores.terreno[8] == 'G' || sensores.terreno[15] == 'G') && !bienSituado)
+				((sensores.terreno[3] == 'X' || sensores.terreno[8] == 'X' || sensores.terreno[15] == 'X') && recargarBateria)
+				)
+				{
+					pendienteGiroDcha = true;
+					cout << "Objeto visto a la derecha" << endl;
+				}
+				
+				//Si está al lado de un muro/precipicio y encuentra una "puerta" a la izquierda, la tomará
+				else if (esTransitable(sensores.terreno[1]) && !esTransitable(sensores.terreno[5]) && muroIzda){
+					pendienteGiroIzda = true;
+					cout << "Puerta a la izquierda" << endl;	
+				}
+				//Si está al lado de un muro/precipicio y encuentra una "puerta" a la derecha, la tomará
+				else if (esTransitable(sensores.terreno[3]) && !esTransitable(sensores.terreno[7]) && muroDcha){
+					pendienteGiroDcha = true;
+					cout << "Puerta a la derecha" << endl;
+				}	
+			}
+			//Mejora para que el personaje no se bloquee en pasajes estrechos girando todo el rato
+			else if((ultimaAccion == actTURN_L || ultimaAccion == actTURN_R) && (!esTransitable(sensores.terreno[2]))){
+				cout << "Giro igual al anterior para salir de sitio estrecho" << endl;
+				accion = ultimaAccion;
+			}
+			else if(!muroDcha && muroIzda){
+				cout << "Giro a la derecha (muros)" << endl;
+				accion = actTURN_R;
+			}
+			else if(muroDcha && !muroIzda){
+			cout << "Giro a la izquierda (muros)" << endl;
+				accion = actTURN_L;
+			}
+			else{
+				switch(brujula % 2){
+					case 0:
+						if(sinDescubrirOeste[0]){
+							accion = girarADireccion(sensores.sentido, 3);
+							cout << "Giro al oeste (final)" << endl;
+						}
+						else if(sinDescubrirEste[0]){
+							accion = girarADireccion(sensores.sentido, 1);
+							cout << "Giro al este (final)" << endl;
+						}
+						break;
+					case 1:
+						if(sinDescubrirNorte[0] ){
+							accion = girarADireccion(sensores.sentido, 0);
+							cout << "Giro al norte (final)" << endl;
+						}
+						else if(sinDescubrirSur[0] ){
+							accion = girarADireccion(sensores.sentido, 2);
+							cout << "Giro al sur (final)" << endl;
+						}
+						break;
+				}
 			
-			//Si está al lado de un muro/precipicio y encuentra una "puerta" a la izquierda, la tomará
-			else if (esTransitable(sensores.terreno[1]) && !esTransitable(sensores.terreno[5]) && muroIzda && bienSituado){
-				pendienteGiroIzda = true;
-				cout << "Puerta a la izquierda" << endl;	
+				
 			}
-			//Si está al lado de un muro/precipicio y encuentra una "puerta" a la derecha, la tomará
-			else if (esTransitable(sensores.terreno[3]) && !esTransitable(sensores.terreno[7]) && muroDcha && bienSituado){
-				pendienteGiroDcha = true;
-				cout << "Puerta a la derecha" << endl;
+		}
+		//Si despues de aplicar todas las normas no se ha aplicado ninguna accion
+		//Se elige al azar girar a la izquierda o a la derecha
+		if(accion == actIDLE){
+			if(girarDerecha){
+				accion = actTURN_R;
+				cout << "Giro a la derecha (final)" << endl;
+			} else {
+				accion = actTURN_L;
+				cout << "Giro a la izquierda (final)" << endl;
 			}	
 		}
-		//Mejora para que el personaje no se bloquee en pasajes estrechos girando todo el rato
-		else if((ultimaAccion == actTURN_L || ultimaAccion == actTURN_R) && (!esTransitable(sensores.terreno[2]))){
-			cout << "Giro igual al anterior para salir de sitio estrecho" << endl;
-			accion = ultimaAccion;
-		}
-		else if(!muroDcha && muroIzda){
-			cout << "Giro a la derecha (muros)" << endl;
-			accion = actTURN_R;
-		}
-		else if(muroDcha && !muroIzda){
-		cout << "Giro a la izquierda (muros)" << endl;
-			accion = actTURN_L;
-		}
-		else{
-			switch(brujula % 2){
-				case 0:
-					if(sinDescubrirOeste){
-						accion = girarADireccion(sensores.sentido, 3);
-						cout << "Giro al oeste (final)" << endl;
-					}
-					else if(sinDescubrirEste){
-						accion = girarADireccion(sensores.sentido, 1);
-						cout << "Giro al este (final)" << endl;
-					}
-					break;
-				case 1:
-					if(sinDescubrirNorte){
-						accion = girarADireccion(sensores.sentido, 0);
-						cout << "Giro al norte (final)" << endl;
-					}
-					else if(sinDescubrirSur){
-						accion = girarADireccion(sensores.sentido, 2);
-						cout << "Giro al sur (final)" << endl;
-					}
-					break;
-			}
-		
-			
-		}
 	}
-	//Si despues de aplicar todas las normas no se ha aplicado ninguna accion
-	//Se elige al azar girar a la izquierda o a la derecha
-	if(accion == actIDLE){
-		if(girarDerecha){
-			accion = actTURN_R;
-			cout << "Giro a la derecha (final)" << endl;
-		} else {
-			accion = actTURN_L;
-			cout << "Giro a la izquierda (final)" << endl;
-		}	
-	}
-	
 	
 	//Regulacion sobre excesivas repeticiones de una misma accion
-	if(ultimaAccion == accion && repeticionesUltimaAccion >= tam_mapa/2 && !sinDescubrirOeste && !sinDescubrirNorte && !sinDescubrirEste && !sinDescubrirSur && girarDerecha){
-		cout << "Giro por repeticion de actFORWARD > tam_mapa/3" << endl;
+	if(ultimaAccion == accion && repeticionesUltimaAccion >= tam_mapa/2 && !sinDescubrirOeste[0] && !sinDescubrirNorte[0] && !sinDescubrirEste[0] && !sinDescubrirSur[0] && girarDerecha){
+		cout << "Giro por repeticion de actFORWARD > tam_mapa/2" << endl;
 		if(ultimaAccion == actFORWARD && girarDerecha2)
 			accion = actTURN_R;
 		else

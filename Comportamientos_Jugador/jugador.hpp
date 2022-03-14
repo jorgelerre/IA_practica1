@@ -19,10 +19,11 @@ class ComportamientoJugador : public Comportamiento{
       tengoBikini = tengoZapatillas = false;
       ultimaAccion = actIDLE;
       pendienteGiroIzda = pendienteGiroDcha = false;
-      sinDescubrirNorte = sinDescubrirEste = sinDescubrirSur = sinDescubrirOeste = false;
+      sinDescubrirNorte[0]  = sinDescubrirEste[0]  = sinDescubrirSur[0]  = sinDescubrirOeste[0]  = false;
       muroDcha = muroIzda = false;
       bloqueadoNorte = bloqueadoEste = bloqueadoSur = bloqueadoOeste = 0;
-      
+      noHaySalida = false;
+      recargarBateria = false;
       
     }
 
@@ -39,10 +40,10 @@ class ComportamientoJugador : public Comportamiento{
   bool girarDerecha, girarDerecha2, bienSituado;
   bool tengoBikini, tengoZapatillas;
   bool pendienteGiroIzda, pendienteGiroDcha;
-  bool sinDescubrirNorte, sinDescubrirEste, sinDescubrirSur, sinDescubrirOeste;
+  bool sinDescubrirNorte[3], sinDescubrirEste[3], sinDescubrirSur[3], sinDescubrirOeste[3];
   bool muroDcha, muroIzda;
   int bloqueadoNorte, bloqueadoEste, bloqueadoSur, bloqueadoOeste;
-  bool noHaySalida;
+  bool noHaySalida, recargarBateria;
   Action ultimaAccion;  
 
 
