@@ -175,7 +175,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 		}
 	}
 	//Actualizacion de si se necesita recargar bateria
-	recargarBateria = ((sensores.bateria < 1500 && sensores.vida > 700) || sensores.bateria < 500);
+	recargarBateria = (sensores.bateria < 3000 && sensores.vida > 1500) || (sensores.bateria < 1500 && sensores.vida > 700) || (sensores.bateria < 500 && sensores.vida > 100));
 	//Comprobación de sectores cercanos sin explorar
 	if(bienSituado){
 		if(fil>=4 && mapaResultado[fil-4][col] == '?')
@@ -336,7 +336,6 @@ Action ComportamientoJugador::think(Sensores sensores){
 				((sensores.terreno[1] == 'K' || sensores.terreno[4] == 'K' || sensores.terreno[9] == 'K') && !tengoBikini)     || 
 				((sensores.terreno[1] == 'D' || sensores.terreno[4] == 'D' || sensores.terreno[9] == 'D') && !tengoZapatillas) ||
 				((sensores.terreno[1] == 'G' || sensores.terreno[4] == 'G' || sensores.terreno[9] == 'G') && !bienSituado)
-				((sensores.terreno[1] == 'X' || sensores.terreno[4] == 'X' || sensores.terreno[9] == 'X') && recargarBateria)
 				){
 					pendienteGiroIzda = true;
 					cout << "Objeto visto a la izquierda" << endl;
@@ -346,13 +345,21 @@ Action ComportamientoJugador::think(Sensores sensores){
 				((sensores.terreno[3] == 'K' || sensores.terreno[8] == 'K' || sensores.terreno[15] == 'K') && !tengoBikini)     || 
 				((sensores.terreno[3] == 'D' || sensores.terreno[8] == 'D' || sensores.terreno[15] == 'D') && !tengoZapatillas) ||
 				((sensores.terreno[3] == 'G' || sensores.terreno[8] == 'G' || sensores.terreno[15] == 'G') && !bienSituado)
-				((sensores.terreno[3] == 'X' || sensores.terreno[8] == 'X' || sensores.terreno[15] == 'X') && recargarBateria)
 				)
 				{
 					pendienteGiroDcha = true;
 					cout << "Objeto visto a la derecha" << endl;
 				}
-				
+				//Si hay una zona de recarga a la izquierda, ve hacia ella
+				else if ((sensores.terreno[3] == 'X' || sensores.terreno[8] == 'X' || sensores.terreno[15] == 'X') && recargarBateria){
+						pendienteGiroIzda = true;
+						cout << "Zona de recarga vista a la izquierda" << endl;
+				}
+				//Si hay una zona de recarga a la derecha, ve hacia ella
+				else if ((sensores.terreno[3] == 'X' || sensores.terreno[8] == 'X' || sensores.terreno[15] == 'X') && recargarBateria){
+						pendienteGiroDcha = true;
+						cout << "Zona de recarga vista a la derecha" << endl;
+				}
 				//Si está al lado de un muro/precipicio y encuentra una "puerta" a la izquierda, la tomará
 				else if (esTransitable(sensores.terreno[1]) && !esTransitable(sensores.terreno[5]) && muroIzda){
 					pendienteGiroIzda = true;
