@@ -23,7 +23,8 @@ class ComportamientoJugador : public Comportamiento{
       sinDescubrirNorte[1]  = sinDescubrirEste[1]  = sinDescubrirSur[1]  = sinDescubrirOeste[1]  = false;
       sinDescubrirNorte[2]  = sinDescubrirEste[2]  = sinDescubrirSur[2]  = sinDescubrirOeste[2]  = false;
       muroDcha = muroIzda = false;
-      bloqueadoNorte = bloqueadoEste = bloqueadoSur = bloqueadoOeste = 0;
+      contador_muroDcha = contador_muroIzda = 0;
+      bloqueadoDireccion[0] = bloqueadoDireccion[1] = bloqueadoDireccion[2] = bloqueadoDireccion[3] = 0;
       noHaySalida = false;
       recargarBateria = false;
       
@@ -44,7 +45,8 @@ class ComportamientoJugador : public Comportamiento{
   bool pendienteGiroIzda, pendienteGiroDcha;
   bool sinDescubrirNorte[3], sinDescubrirEste[3], sinDescubrirSur[3], sinDescubrirOeste[3];
   bool muroDcha, muroIzda;
-  int bloqueadoNorte, bloqueadoEste, bloqueadoSur, bloqueadoOeste;
+  int contador_muroDcha, contador_muroIzda;
+  int bloqueadoDireccion[4];
   bool noHaySalida, recargarBateria;
   Action ultimaAccion;  
 
