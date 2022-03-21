@@ -2,6 +2,13 @@
 #define COMPORTAMIENTOJUGADOR_H
 
 #include "comportamientos/comportamiento.hpp"
+
+#define NORTE 0
+#define ESTE  1
+#define SUR   2
+#define OESTE 3
+
+
 using namespace std;
 
 class ComportamientoJugador : public Comportamiento{
@@ -11,20 +18,23 @@ class ComportamientoJugador : public Comportamiento{
       // Constructor de la clase
       // Dar el valor inicial a las variables de estado
       tam_mapa = size;
-      fil = col = 99;
-      brujula = 0;
+      fil = col = tam_mapa;
+      brujula = NORTE;
       repeticionesUltimaAccion = 0;
       bienSituado = false;
       girarDerecha = girarDerecha2 = false;
       tengoBikini = tengoZapatillas = false;
       ultimaAccion = actIDLE;
       pendienteGiroIzda = pendienteGiroDcha = false;
-      sinDescubrirNorte[0]  = sinDescubrirEste[0]  = sinDescubrirSur[0]  = sinDescubrirOeste[0]  = false;
-      sinDescubrirNorte[1]  = sinDescubrirEste[1]  = sinDescubrirSur[1]  = sinDescubrirOeste[1]  = false;
-      sinDescubrirNorte[2]  = sinDescubrirEste[2]  = sinDescubrirSur[2]  = sinDescubrirOeste[2]  = false;
+      for(int i = 0; i < 4; i++)
+      	for(int j = 0; j < 3; j++)
+      		sinDescubrir[i][j] = false;
       muroDcha = muroIzda = false;
       contador_muroDcha = contador_muroIzda = 0;
-      bloqueadoDireccion[0] = bloqueadoDireccion[1] = bloqueadoDireccion[2] = bloqueadoDireccion[3] = 0;
+      for(int i = 0; i < 4; i++)
+      	bloqueadoDireccion[i] = 0;
+      
+
       noHaySalida = false;
       recargarBateria = false;
       
@@ -39,11 +49,13 @@ class ComportamientoJugador : public Comportamiento{
   private:
   // Declarar aquí las variables de estado
   int fil, col, brujula, tam_mapa;
+  char mapaPreLocalizacion[tam_mapa*2+1][tam_mapa*2+1];
+  
   int repeticionesUltimaAccion;
   bool girarDerecha, girarDerecha2, bienSituado;
   bool tengoBikini, tengoZapatillas;
   bool pendienteGiroIzda, pendienteGiroDcha;
-  bool sinDescubrirNorte[3], sinDescubrirEste[3], sinDescubrirSur[3], sinDescubrirOeste[3];
+  bool sinDescubrir[4][3];
   bool muroDcha, muroIzda;
   int contador_muroDcha, contador_muroIzda;
   int bloqueadoDireccion[4];
@@ -57,3 +69,4 @@ class ComportamientoJugador : public Comportamiento{
 };
 
 #endif
+
