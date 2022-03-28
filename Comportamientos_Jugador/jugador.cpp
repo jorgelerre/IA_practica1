@@ -46,7 +46,29 @@ void registrarMapa(Sensores sensores, int brujula, int fil, int col, vector<vect
 		int coef = 1;
 		if(brujula == NORTE || brujula == OESTE)
 			coef = -1;
-			
+		int k = 0;
+	
+		if(brujula == NORTE || brujula == SUR){
+			for(int x = 0; x < 4; x++){
+				aux_1 = fil+x*coef;
+				for(int y = -x; y <= x; y++){
+					aux_2 = col-y*coef;
+					mapa[aux_1][aux_2] = sensores.terreno[k];
+					k++;
+				}
+			}	
+		}
+		else{
+			for(int x = 0; x < 4; x++){
+				aux_1 = col+x*coef;
+				for(int y = -x; y <= x; y++){
+					aux_2 = fil+y*coef;
+					mapa[aux_2][aux_1] = sensores.terreno[k];
+					k++;
+				}
+			}
+		}
+		/*	
 		if(brujula == ESTE || brujula == OESTE){
 			mapa[fil-1*coef][col+1*coef] = sensores.terreno[1];
 			mapa[fil]       [col+1*coef] = sensores.terreno[2];
@@ -81,6 +103,7 @@ void registrarMapa(Sensores sensores, int brujula, int fil, int col, vector<vect
 			mapa[fil+3*coef][col-2*coef] = sensores.terreno[14];
 			mapa[fil+3*coef][col-3*coef] = sensores.terreno[15];
 		}
+		*/
 
 }
 Action ComportamientoJugador::think(Sensores sensores){
