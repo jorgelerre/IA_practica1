@@ -22,7 +22,7 @@ class ComportamientoJugador : public Comportamiento{
       brujula = NORTE;
       repeticionesUltimaAccion = 0;
       bienSituado = false;
-      girarDerecha = girarDerecha2 = false;
+      random1 = random2 = false;
       tengoBikini = tengoZapatillas = false;
       ultimaAccion = actIDLE;
       pendienteGiroIzda = pendienteGiroDcha = false;
@@ -31,7 +31,7 @@ class ComportamientoJugador : public Comportamiento{
       		sinDescubrir[i][j] = false;
       muroDcha = muroIzda = false;
       contador_muroDcha = contador_muroIzda = 0;
-      contadorObjeto = 0;
+      contadorObjeto = contadorDescubrir = 0;
       for(int i = 0; i < 4; i++)
       	bloqueadoDireccion[i] = 0;
       
@@ -55,23 +55,42 @@ class ComportamientoJugador : public Comportamiento{
   int fil, col, brujula, tam_mapa;
   vector<vector<unsigned char>> mapaPreLocalizacion;
   int repeticionesUltimaAccion;
-  bool girarDerecha, girarDerecha2, bienSituado;
+  bool random1, random2;
+  bool bienSituado;	//Determina si hemos pasado por una casilla de posicionamiento
   bool tengoBikini, tengoZapatillas;
   bool pendienteGiroIzda, pendienteGiroDcha;
-  bool sinDescubrir[4][3];
+  //Cuatro vectores (uno por orientación) de dos elementos. Indican si hay zona sin 
+  //descubrir en esa dirección, uno a una distancia de 4 y el otro a 8
+  bool sinDescubrir[4][2];
+  //Indican si hay una zona no transitable a los lados del jugador
+  //(ya que la vision no llega ahi)
   bool muroDcha, muroIzda;
+  //Cuentan durante cuanto tiempo se tiene un muro a un lado. Util para hallar puertas.
   int contador_muroDcha, contador_muroIzda;
+  //Muestra el tiempo que se lleva sin chocar con un borde en cierta dirección. Util para
+  //determinar cuando girar al jugador para descubrir mapa evitando murallas o precipicios
+  //grandes.
   int bloqueadoDireccion[4];
-  int contadorObjeto;
-  bool noHaySalida, recargarBateria;
+  //Contadores para saber si hay un objeto cerca o si se ha girado para descubrir mapa hace poco
+  int contadorObjeto, contadorDescubrir;
+  //Determina si el jugador está atrapado en una isla pequenia, rodeada de terreno intransitable.
+  //Si esto se da, permitiremos el avance por zonas de bosque y agua, aun sin tener la 
+  //indumentaria adecuada.
+  bool noHaySalida;
+  //Determina si hace falta recargar la batería, según cuanta quede y los ciclos restantes.
+  bool recargarBateria;
+  //Recordamos la acción anterior
   Action ultimaAccion;  
 
 
   //Funciones auxiliares
+  
+  //Devuelve true si el jugador puede avanzar por ese terreno.
   bool esTransitable(char tipoCasilla);
-  Action girarADireccion(int sentidoActual, int nuevoSentido);
+  
+  //Gira al jugador desde sentido
+  Action girarADireccion(int nuevoSentido);
+  void registrarMapa(Sensores sensores, vector<vector<unsigned char>> & mapa);
 };
 
 #endif
-
-
