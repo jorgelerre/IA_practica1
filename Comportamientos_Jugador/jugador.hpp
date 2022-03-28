@@ -2,7 +2,7 @@
 #define COMPORTAMIENTOJUGADOR_H
 
 #include "comportamientos/comportamiento.hpp"
-
+#include <vector>
 #define NORTE 0
 #define ESTE  1
 #define SUR   2
@@ -31,10 +31,14 @@ class ComportamientoJugador : public Comportamiento{
       		sinDescubrir[i][j] = false;
       muroDcha = muroIzda = false;
       contador_muroDcha = contador_muroIzda = 0;
+      contadorObjeto = 0;
       for(int i = 0; i < 4; i++)
       	bloqueadoDireccion[i] = 0;
       
-
+      mapaPreLocalizacion.resize(tam_mapa*2+1);
+      for(int i = 0; i < tam_mapa*2+1; i++)
+        mapaPreLocalizacion[i].resize(tam_mapa*2+1, '?');
+      
       noHaySalida = false;
       recargarBateria = false;
       
@@ -49,8 +53,7 @@ class ComportamientoJugador : public Comportamiento{
   private:
   // Declarar aquí las variables de estado
   int fil, col, brujula, tam_mapa;
-  char mapaPreLocalizacion[tam_mapa*2+1][tam_mapa*2+1];
-  
+  vector<vector<unsigned char>> mapaPreLocalizacion;
   int repeticionesUltimaAccion;
   bool girarDerecha, girarDerecha2, bienSituado;
   bool tengoBikini, tengoZapatillas;
@@ -59,6 +62,7 @@ class ComportamientoJugador : public Comportamiento{
   bool muroDcha, muroIzda;
   int contador_muroDcha, contador_muroIzda;
   int bloqueadoDireccion[4];
+  int contadorObjeto;
   bool noHaySalida, recargarBateria;
   Action ultimaAccion;  
 
@@ -69,4 +73,5 @@ class ComportamientoJugador : public Comportamiento{
 };
 
 #endif
+
 
