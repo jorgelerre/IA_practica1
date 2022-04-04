@@ -52,24 +52,36 @@ class ComportamientoJugador : public Comportamiento{
 
   private:
   // Declarar aquí las variables de estado
+  
+  //Variables de posicionamiento
   int fil, col, brujula, tam_mapa;
-  vector<vector<unsigned char>> mapaPreLocalizacion;
+  //Número de veces consecutivas que se ha realizado la última acción
   int repeticionesUltimaAccion;
+  //Valores aleatorios generados cada iteración
   bool random1, random2;
   bool bienSituado;	//Determina si hemos pasado por una casilla de posicionamiento
+  //Mapa auxiliar donde se registra el mapa antes de tomar una casilla de posicionamiento
+  //(cuando bienSituado es falso)
+  vector<vector<unsigned char>> mapaPreLocalizacion;
+  //Variables que registran los objetos que tiene el jugador
   bool tengoBikini, tengoZapatillas;
+  //Variables usadas para realizar combinaciones de movimientos. Si una se activa, en el
+  //siguiente turno el jugador la realizará.
   bool pendienteGiroIzda, pendienteGiroDcha;
   //Cuatro vectores (uno por orientación) de dos elementos. Indican si hay zona sin 
-  //descubrir en esa dirección, uno a una distancia de 4 y el otro a 8
+  //descubrir en esa dirección, uno a una distancia de 4 (justo una unidad más allá del 
+  //alcance de la visión del jugador) y el otro a 8 (algo más lejos).
   bool sinDescubrir[4][2];
-  //Indican si hay una zona no transitable a los lados del jugador
-  //(ya que la vision no llega ahi)
+  //Indican si hay una zona no transitable a los lados izquierdo y derecho del jugador
+  //(ya que la vision no llega ahi). Se registra en el turno anterior.
   bool muroDcha, muroIzda;
   //Cuentan durante cuanto tiempo se tiene un muro a un lado. Util para hallar puertas.
   int contador_muroDcha, contador_muroIzda;
-  //Muestra el tiempo que se lleva sin chocar con un borde en cierta dirección. Util para
-  //determinar cuando girar al jugador para descubrir mapa evitando murallas o precipicios
-  //grandes.
+  //Muestra un contador que cada turno se decrementa en 1. Cuando el personaje choca contra 
+  //una zona no transitable en cierta dirección, el contador bloqueadoDireccion[brujula] se
+  //resetea a un valor positivo. Cuando el valor de la variable es mayor que 0, se intentan 
+  //evitar giros a esa dirección. Util para determinar cuando girar al jugador para descubrir
+  //mapa evitando murallas o precipicios grandes.
   int bloqueadoDireccion[4];
   //Contadores para saber si hay un objeto cerca o si se ha girado para descubrir mapa hace poco
   int contadorObjeto, contadorDescubrir;
@@ -84,12 +96,12 @@ class ComportamientoJugador : public Comportamiento{
 
 
   //Funciones auxiliares
-  
   //Devuelve true si el jugador puede avanzar por ese terreno.
+  //La variable noHaySalida puede cambiar qué casillas son consideradas transitables.
   bool esTransitable(char tipoCasilla);
-  
-  //Gira al jugador desde sentido
+  //Gira al jugador hacia cierta orientación.
   Action girarADireccion(int nuevoSentido);
+  //Se encarga de registrar la vision del jugador en cierto mapa.
   void registrarMapa(Sensores sensores, vector<vector<unsigned char>> & mapa);
 };
 
